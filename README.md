@@ -46,3 +46,5 @@ python sistema_bancario.py
 ### Tela do Projeto
 
 ![tela-projeto](./assets/images/tela_projeto.png)
+
+😉 Espero que você curtam a minha versão do desafio.
