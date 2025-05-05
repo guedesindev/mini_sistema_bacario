@@ -8,19 +8,26 @@ menu = """
 saldo = 0.00
 limite = 50.00
 numero_saques = 0
+numero_transacoes = 0
 LIMITE_SAQUES = 3
+LIMITE_TRANSACOES = 10
+LIMITE_INICIAL = 50.00
+
 extrato = ""
 
-LIMITE_INICIAL = 50.00
-def depositar(saldo, limite, extrato):
+def depositar(saldo, limite, extrato, num_transacoes, lim_transacoes):
   """ Função para realizar depósito na conta"""
+  excedeu_operacoes = num_transacoes >= lim_transacoes
   while True:
     valor_str = input('Insira o valor a depoisitar: ')
     if not valor_str:
       print('Digite algum valor a depositar. ("q" para cancelar.)')
     elif valor_str == 'q':
       print('Retornando ao menu superior')
-      return saldo, limite, extrato      
+      return saldo, limite, extrato , numero_transacoes 
+    elif excedeu_operacoes:
+      print('Não é possível realizar mais operações hoje.')
+      return saldo, limite, extrato, numero_transacoes 
     else:
       valor = float(valor_str)
       if valor <= 0:      
@@ -28,29 +35,35 @@ def depositar(saldo, limite, extrato):
       else:
         limite_usado = LIMITE_INICIAL - limite
         restituir_limite = 0
-        if limite_usado > 0:
+        if limite_usado > 0 and num_transacoes < LIMITE_TRANSACOES:
           restituir_limite = min(valor, limite_usado)
           limite += restituir_limite
           valor -= restituir_limite
+          num_transacoes += 1
         saldo += valor
         extrato += f"(+)  R$ {valor+restituir_limite:,.2f}\n"
         print('Depósito realizado com sucesso!')
-        return saldo, limite, extrato
+        num_transacoes += 1
+
+        return saldo, limite, extrato, num_transacoes
   
-def sacar(saldo, limite, n_saques, l_saques, extrato):
+def sacar(saldo, limite, n_saques, l_saques, extrato, num_transacoes, lim_transacoes):
   """Função para realizar saques."""
   excedeu_saques = n_saques >= l_saques
+  execedeu_lim_transacoes = num_transacoes >= lim_transacoes
   
   if saldo + limite == 0:
     print('Operação Indisponível no momento. Verifique seu saldo.')
   elif excedeu_saques:
     print('Operação Indisponível. Numero máximo de saques excedido.')
+  elif execedeu_lim_transacoes:
+    print('Não é possível realizar mais operações hoje.')
   else:
     while True:
       valor_str = input('Insira o valor. ("q" para cancelar.)')
       if valor_str == 'q':
         print('Retornando ao menu superior')
-        return saldo, n_saques, limite, extrato
+        return saldo, n_saques, limite, extrato, num_transacoes
       else:
         valor = float(valor_str)
         if valor <= 0:
@@ -67,7 +80,7 @@ def sacar(saldo, limite, n_saques, l_saques, extrato):
             extrato += f"(-)   R$ {valor:,.2f}\n"
             n_saques += 1
             print('Saque realizado com sucesso!')
-            return saldo, n_saques, limite, extrato
+            return saldo, n_saques, limite, extrato, num_transacoes
           else:
             # Usar o saldo restante e parte do limite
             valor_restante = valor - saldo
@@ -76,7 +89,7 @@ def sacar(saldo, limite, n_saques, l_saques, extrato):
             extrato += f"(-)   valor R$ {valor:,.2f}\n"
             n_saques += 1
             print('Saque realizado com sucesso!')
-            return saldo, n_saques, limite, extrato
+            return saldo, n_saques, limite, extrato, num_transacoes
 
 def emitir_extrato(extrato):
   if len(extrato) == 0:
@@ -101,9 +114,9 @@ while True:
     case 'q':
       break
     case 'd':
-      saldo, limite, extrato = depositar(saldo, limite, extrato)
+      saldo, limite, extrato, numero_transacoes = depositar(saldo, limite, extrato, numero_transacoes, LIMITE_TRANSACOES)
     case 's':
-      saldo, numero_saques, limite, extrato = sacar(saldo, limite, numero_saques, LIMITE_SAQUES, extrato)
+      saldo, numero_saques, limite, extrat, numero_transacoes = sacar(saldo, limite, numero_saques, LIMITE_SAQUES, extrato, numero_transacoes, LIMITE_TRANSACOES)
     case 'e':
       emitir_extrato(extrato)
     case _:
@@ -111,3 +124,4 @@ while True:
 
 
 print('Numero de Saques', numero_saques)
+print('Numero de Transacoes', numero_transacoes)
