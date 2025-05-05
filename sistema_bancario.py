@@ -1,3 +1,5 @@
+from datetime import datetime
+
 menu = """
 [d] Depositar
 [s] Sacar
@@ -14,6 +16,15 @@ LIMITE_TRANSACOES = 10
 LIMITE_INICIAL = 50.00
 
 extrato = ""
+
+def marcar_horario():
+  """
+    Função para returnar o momento exato que uma operação foi realizada para salvar no extrato
+    retornos: 
+      data (date): O dia que a operação foi realizada
+      hora (time): A hora com precisão de segundos que uma operação foi realizada.
+  """
+  return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
 def depositar(saldo, limite, extrato, num_transacoes, lim_transacoes):
   """ Função para realizar depósito na conta"""
@@ -41,7 +52,8 @@ def depositar(saldo, limite, extrato, num_transacoes, lim_transacoes):
           valor -= restituir_limite
           num_transacoes += 1
         saldo += valor
-        extrato += f"(+)  R$ {valor+restituir_limite:,.2f}\n"
+        data_hora = marcar_horario()
+        extrato += f"| {data_hora} (+)  R$ {valor+restituir_limite:,.2f} |\n"
         print('Depósito realizado com sucesso!')
         num_transacoes += 1
 
@@ -77,7 +89,8 @@ def sacar(saldo, limite, n_saques, l_saques, extrato, num_transacoes, lim_transa
         else:
           if valor <= saldo:
             saldo -= valor
-            extrato += f"(-)   R$ {valor:,.2f}\n"
+            data_hora = marcar_horario()
+            extrato += f"| {data_hora} (-)   R$ {valor:,.2f} |\n"
             n_saques += 1
             print('Saque realizado com sucesso!')
             return saldo, n_saques, limite, extrato, num_transacoes
@@ -86,7 +99,8 @@ def sacar(saldo, limite, n_saques, l_saques, extrato, num_transacoes, lim_transa
             valor_restante = valor - saldo
             saldo = 0
             limite -= valor_restante
-            extrato += f"(-)   valor R$ {valor:,.2f}\n"
+            data_hora = marcar_horario()
+            extrato += f"| {data_hora} (-)   R$ {valor:,.2f} |\n"
             n_saques += 1
             print('Saque realizado com sucesso!')
             return saldo, n_saques, limite, extrato, num_transacoes
@@ -95,12 +109,13 @@ def emitir_extrato(extrato):
   if len(extrato) == 0:
     print('Não há operações a serem exibidas')
   else:
-    print('\n=============================')
-    print('========== EXTRATO ==========')
-    print('=============================')
+    print('\n======================================')
+    print('============== EXTRATO ===============')
+    print('======================================')
     print("Não foram realizadas movimentações;" if not extrato else extrato)
     print(f"Saldo: R$ {saldo:,.2f}")
     print(f"Limite: R$ {limite:,.2f}")
+    print(f'Horário da extração deste extrato: {marcar_horario()}')
     print("\n")
 
 
@@ -108,7 +123,7 @@ print('==================================================')
 print('=== Sistema Bancário Suzano - Python Developer ===')
 print('==================================================\n')
 while True:
-  print('\nEscolha uma operação:')
+  print('\nEscolha uma operação:\n')
   opcao = input(menu)
   match opcao:
     case 'q':
@@ -116,12 +131,12 @@ while True:
     case 'd':
       saldo, limite, extrato, numero_transacoes = depositar(saldo, limite, extrato, numero_transacoes, LIMITE_TRANSACOES)
     case 's':
-      saldo, numero_saques, limite, extrat, numero_transacoes = sacar(saldo, limite, numero_saques, LIMITE_SAQUES, extrato, numero_transacoes, LIMITE_TRANSACOES)
+      saldo, numero_saques, limite, extrato, numero_transacoes = sacar(saldo, limite, numero_saques, LIMITE_SAQUES, extrato, numero_transacoes, LIMITE_TRANSACOES)
     case 'e':
       emitir_extrato(extrato)
     case _:
       continue
 
 
-print('Numero de Saques', numero_saques)
+print('Numero de Operações:', numero_saques)
 print('Numero de Transacoes', numero_transacoes)
