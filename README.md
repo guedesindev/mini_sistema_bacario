@@ -4,22 +4,22 @@
 
 ![image](./assets/images/logo_bootcamp.png)
 
-## mini_sistema_bacario
+## mini_sistema_bancario
 
 </div>
 Um projeto para conclusão do módulo de `sintaxe básica de python`
 
 ### 👨🏽‍💻 O que é
 
-Um sistema bancário que ao iniciara a aplicação surge um menu com as opções?
+Um sistema bancário que ao iniciar a aplicação surge um menu com as opções?
 <ul style="list-style:none">
-<li>[d] Depositar</li>
-<li>[s] Sacar</li>
-<li>[e] Extrato</li>
-<li>[q] Sair</li>
+<li>`[d]` Depositar</li>
+<li>`[s]` Sacar</li>
+<li>`[e]` Extrato</li>
+<li>`[q]` Sair</li>
 </ul>
 
-O usuário digita uma das opções e a função para executar a opção do usuário.
+O usuário digita uma das opções e e o sistema executa a ação correspondente.
 
 ### 🛠️ Ambiente de desenvolvimento
 
@@ -30,7 +30,7 @@ O usuário digita uma das opções e a função para executar a opção do usuá
 
 ### Como usar
 
-Clonar o respositório em um diretório local
+Clonar o repositório em um diretório local
 
 ```ssh
 git clone git@github.com:guedesindev/mini_sistema_bacario.git
@@ -39,7 +39,7 @@ git clone git@github.com:guedesindev/mini_sistema_bacario.git
 Executar o projeto
 
 ```ssh
-cd mini_sistema_bacario
+cd mini_sistema_bancario
 python sistema_bancario.py
 ```
 
@@ -47,4 +47,6 @@ python sistema_bancario.py
 
 ![tela-projeto](./assets/images/tela_projeto.png)
 
+### 🤝 Contribuindo
+Fique à vontade para enviar sugestões ou melhorias! Esse projeto é uma jornada de aprendizado e toda colaboração é bem-vinda.
 😉 Espero que você curtam a minha versão do desafio.
