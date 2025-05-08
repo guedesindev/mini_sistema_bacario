@@ -1,6 +1,10 @@
 from datetime import datetime, date
+import locale
+
+import validacoes_cadastro_usuario as validacoes
 
 menu = """
+[c] Cadastrar Usuario
 [d] Depositar
 [s] Sacar
 [e] Extrato
@@ -152,15 +156,53 @@ def emitir_extrato(extrato):
     print("\n")
 
 
+def criar_usuario():
+  usuario = {}
+
+  nome = validacoes.receber_input_validado('Nome: ', 'Nome', validacoes.validar_nome, "Nome Inválido.")
+  usuario['nome'] = nome
+
+  cpf = validacoes.receber_input_validado('CPF (apenas dígitos): ', 'CPF', validacoes.validar_cpf, 'CPF Inválido. Digite apenas os 11 números.')
+  usuario['cpf'] = cpf
+
+  dt_nascimento = validacoes.receber_input_validado('Data de nascimento (formato: dd/mm/aaaa): ', 'Data de Nascimento', validacoes.validar_dt_nascimento, "Formato de data inválido (dd/mm/aaaa).", validacoes.converter_dt_nascimento)
+  usuario['data_nascimento'] = dt_nascimento
+
+  usuario['endereco'] = []
+
+  logradouro = validacoes.receber_input_validado('Logradouro', 'logradouro', validacoes.validar_text_obrigatorio, 'Logradouro inválido')
+  usuario['endereco'].append(logradouro)
+  
+  nro = validacoes.receber_input_validado('Nº: ', 'número', validacoes.validar_numero_endereco,  "O nº do endereço deve ser um dígito, ou 0 se não houver.", validacoes.converter_numero_endereco)
+  usuario['endereco'].append(nro)
+
+  bairro = validacoes.receber_input_validado('Bairro: ', 'bairro', validacoes.validar_text_obrigatorio, "Bairro inválido")
+  usuario['endereco'].append(bairro)
+
+  cidade = validacoes.receber_input_validado('Cidade: ', 'cidade', validacoes.validar_text_obrigatorio, 'Valor inválido para cidade.')
+  usuario['endereco'].append(cidade)
+
+  uf = validacoes.receber_input_validado('UF: ', 'uf', validacoes.validar_uf, 'UF inválida (exemplo: SP).')
+  usuario['endereco'].append(uf)
+
+  usuario['conta'] = []
+
+  return usuario
+
+
 def main():
   global saldo, limite, numero_saques, numero_transacoes, extrato, LIMITE_SAQUES
-  print('==================================================')
+  print('\n==================================================')
   print('=== Sistema Bancário Suzano - Python Developer ===')
-  print('==================================================\n')
+  print('==================================================')
   while True:
-    print('\nEscolha uma operação:\n')
+    print('Escolha uma operação:')
     opcao = input(menu)
     match opcao:
+      case 'c':
+        usuario = criar_usuario()
+        validacoes.usuarios.append(usuario)
+        print(validacoes.usuarios)
       case 'q':
         break
       case 'd':
