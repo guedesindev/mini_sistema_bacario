@@ -13,11 +13,11 @@ Um projeto para conclusão do módulo de `sintaxe básica de python`
 
 Um sistema bancário que ao iniciar a aplicação surge um menu com as opções?
 
+`[c]` Cadastrar Usuário<br>
 `[d]` Depositar<br>
 `[s]` Sacar<br>
 `[e]` Extrato<br>
 `[q]` Sair<br>
-
 
 O usuário digita uma das opções e e o sistema executa a ação correspondente.
 
@@ -48,6 +48,7 @@ python sistema_bancario.py
 ![tela-projeto](./assets/images/tela_projeto.png)
 
 ### 🤝 Contribuindo
+
 Fique à vontade para enviar sugestões ou melhorias! Esse projeto é uma jornada de aprendizado e toda colaboração é bem-vinda.
 
 😉 Espero que você curtam a minha versão do desafio.
