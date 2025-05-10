@@ -4,7 +4,8 @@ import locale
 import validacoes_cadastro_usuario as validacoes
 
 menu = """
-[c] Cadastrar Usuario
+[u] Cadastrar Usuario
+[c] Criar Conta
 [d] Depositar
 [s] Sacar
 [e] Extrato
@@ -21,6 +22,7 @@ LIMITE_INICIAL = 50.00
 
 extrato = ""
 historico_transacoes = []
+contas = []
 
 
 def verificar_transacoes_dia(historico_transacoes, LIMITE_TRANSACOES):
@@ -170,7 +172,7 @@ def criar_usuario():
 
   usuario['endereco'] = []
 
-  logradouro = validacoes.receber_input_validado('Logradouro', 'logradouro', validacoes.validar_text_obrigatorio, 'Logradouro inválido')
+  logradouro = validacoes.receber_input_validado('Logradouro: ', 'logradouro', validacoes.validar_text_obrigatorio, 'Logradouro inválido')
   usuario['endereco'].append(logradouro)
   
   nro = validacoes.receber_input_validado('Nº: ', 'número', validacoes.validar_numero_endereco,  "O nº do endereço deve ser um dígito, ou 0 se não houver.", validacoes.converter_numero_endereco)
@@ -190,6 +192,39 @@ def criar_usuario():
   return usuario
 
 
+def criar_conta():
+  nro_conta = len(contas) + 1
+  agencia = '0001'
+      
+  while True:
+    cpf = input('CPF do cliente (digite "q" para voltar ao menu anterior): ')
+    if cpf == 'q':
+      break
+    else: 
+      cpf_limpo = cpf.replace('.', '').replace('-', '')
+      if not cpf_limpo.isdigit() or len(cpf) != 11:
+        print('CPF inválido. Digite apenas 11 numeros')
+        return False
+      else:
+        usuario = localizar_cli(cpf_limpo)
+        if usuario:
+          conta = {'agencia':agencia, 'conta':nro_conta}
+          contas.append(conta)
+          usuario.setdefault('conta', []).append(conta)
+          print(f"Conta {nro_conta} criada para o cliente {usuario.get('nome')} (CPF: {usuario.get('cpf')}).")
+          break
+        else:
+          print('Cliente não localizado. Verifique o CPF digitado.')
+  
+  
+def localizar_cli(cpf):
+    for usuario in validacoes.usuarios:
+      if usuario.get('cpf') == cpf:
+        return usuario
+    print('Cliente não localizado, favor verifique o CPF digitado.')
+    return None        
+
+
 def main():
   global saldo, limite, numero_saques, numero_transacoes, extrato, LIMITE_SAQUES
   print('\n==================================================')
@@ -199,10 +234,12 @@ def main():
     print('Escolha uma operação:')
     opcao = input(menu)
     match opcao:
-      case 'c':
+      case 'u':
         usuario = criar_usuario()
         validacoes.usuarios.append(usuario)
         print(validacoes.usuarios)
+      case 'c':
+        criar_conta()
       case 'q':
         break
       case 'd':
