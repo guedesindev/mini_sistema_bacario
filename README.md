@@ -45,7 +45,9 @@ python sistema_bancario.py
 
 ### Tela do Projeto
 
-![tela-projeto](./assets/images/tela_projeto.png)
+#### Menu Principal
+
+![menu](./assets/images/menu_principal.png)
 
 ### 🤝 Contribuindo
 
