@@ -88,7 +88,7 @@ def depositar(saldo, limite, extrato, num_transacoes, lim_transacoes):
         return saldo, limite, extrato, num_transacoes, historico
   
 
-def sacar(saldo, limite, n_saques, l_saques, extrato, num_transacoes):
+def sacar(*, saldo, limite, n_saques, l_saques, extrato, num_transacoes):
   """Função para realizar saques."""
   excedeu_saques = n_saques >= l_saques
   
@@ -144,7 +144,7 @@ def sacar(saldo, limite, n_saques, l_saques, extrato, num_transacoes):
             return saldo, n_saques, limite, extrato, num_transacoes, historico
 
 
-def emitir_extrato(extrato):
+def emitir_extrato(saldo, /, *, extrato=extrato):
   if len(extrato) == 0:
     print('Não há operações a serem exibidas')
   else:
@@ -250,14 +250,14 @@ def main():
           print('Não é possível realizar mais transações hoje, limite diário atingido')
       case 's':
         if(not verificar_transacoes_dia(historico_transacoes, LIMITE_TRANSACOES)):
-          saldo, numero_saques, limite, extrato, numero_transacoes, historico = sacar(saldo, limite, numero_saques, LIMITE_SAQUES, extrato, numero_transacoes)
+          saldo, numero_saques, limite, extrato, numero_transacoes, historico = sacar(saldo=saldo, limite=limite, n_saques=numero_saques, l_saques=LIMITE_SAQUES, extrato=extrato, num_transacoes=numero_transacoes)
           historico_transacoes.append(historico)
         elif numero_saques >= LIMITE_SAQUES:
           print('Operação Indisponível. Numero máximo de saques excedido.')
         else:
           print('Não é possível realizar mais transações hoje, limite diário atingido')
       case 'e':
-        emitir_extrato(extrato)
+        emitir_extrato(saldo, extrato=extrato)
       case _:
         continue
 
