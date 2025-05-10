@@ -4,12 +4,12 @@ import locale
 import validacoes_cadastro_usuario as validacoes
 
 menu = """
-[u] Cadastrar Usuario
-[c] Criar Conta
-[d] Depositar
-[s] Sacar
-[e] Extrato
-[q] Sair
+[u]\tCadastrar Usuario
+[c]\tCriar Conta
+[d]\tDepositar
+[s]\tSacar
+[e]\tExtrato
+[q]\tSair
 """
 # Variáveis da conta
 saldo = 0.00
