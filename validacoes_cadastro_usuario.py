@@ -3,8 +3,7 @@ import locale
 
 locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
 
-# usuarios = [{'nome': 'Fernando', 'cpf': '78945612335', 'data_nascimento': datetime.date(1980, 12, 22), 'endereco': ['Rua do Chafariz', 0, 'Caípe', 'São Francisco do Conde', 'BA'], 'conta': []}]
-usuarios = []
+clientes = []
 
 def receber_input_validado(mensagem, campo, validacao=None, mensagem_erro=None, converter=None):
   while True:
@@ -62,8 +61,8 @@ def validar_uf(uf):
 
 
 def verificar_cpf_existente(cpf):
-  for usuario in usuarios:
-    if usuario['cpf'] == cpf:
+  for cliente in clientes:
+    if cliente.cpf == cpf:
       return True
   else:
     return False
