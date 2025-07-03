@@ -19,22 +19,6 @@ def menu():
   return input(textwrap.dedent(menu))
 
 
-# def gerar_relatorio_transacoes(self, tipo_filtro=None):
-#   """
-#   Gerador que itera sobre transações do histórico,
-#   opcionalmente filtrando por tipo.
-  
-#   Args:
-#     tipo_filtro (str, opcional): O nome da classe da transação para filtrar
-#                                   (ex. "Desposito", "Saque"). Se None retorna todas.
-#   Yields:
-#     dict: Um dicionario representando uma transação.                  
-#   """
-#   for transacao in self.transacoes:
-#     if tipo_filtro is None or transacao["tipo"].lower() == tipo_filtro.lower():
-#       yield transacao
-
-
 # Decorador para aplicar um log em transações realizadas.
 def log_transacao(tipo_transacao): # tipo_transação é o argumento passado na chamada do decorador para saber qual transação está sendo realizada.
   def decorador_interna(func):
