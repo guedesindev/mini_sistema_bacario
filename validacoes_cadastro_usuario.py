@@ -25,12 +25,12 @@ def validar_nome(nome):
 def validar_cpf(cpf):
   """Este método não validará o digito verificador, apenas sanitizará o cpf digitado pelo usuário garantindo que contenha apenas os números"""
   cpf_limpo = cpf.replace('.', '').replace('-', '')
-  if not cpf_limpo .isdigit() and len(cpf) == 11:
+  if not cpf_limpo.isdigit() or len(cpf) != 11:
     print('CPF inválido. Digite apenas 11 numeros')
     return False
-  elif verificar_cpf_existente(cpf_limpo):
-    print('CPF já cadastrado.')
-    return False
+  # elif verificar_cpf_existente(cpf_limpo):
+  #   print('CPF já cadastrado.')
+  #   return False
   else:
     print('CPF não cadastrado, continuando o cadastro.')
     return True

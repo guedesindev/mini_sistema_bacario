@@ -3,8 +3,7 @@ import locale
 from abc import ABC, abstractmethod, abstractproperty
 import validacoes_cadastro_usuario as validacoes
 import textwrap
-
-contas = []
+from functools import wraps
 
 def menu():
   menu = """
@@ -18,6 +17,45 @@ def menu():
   [q]\tsair
   => """
   return input(textwrap.dedent(menu))
+
+
+# def gerar_relatorio_transacoes(self, tipo_filtro=None):
+#   """
+#   Gerador que itera sobre transações do histórico,
+#   opcionalmente filtrando por tipo.
+  
+#   Args:
+#     tipo_filtro (str, opcional): O nome da classe da transação para filtrar
+#                                   (ex. "Desposito", "Saque"). Se None retorna todas.
+#   Yields:
+#     dict: Um dicionario representando uma transação.                  
+#   """
+#   for transacao in self.transacoes:
+#     if tipo_filtro is None or transacao["tipo"].lower() == tipo_filtro.lower():
+#       yield transacao
+
+
+# Decorador para aplicar um log em transações realizadas.
+def log_transacao(tipo_transacao): # tipo_transação é o argumento passado na chamada do decorador para saber qual transação está sendo realizada.
+  def decorador_interna(func):
+    @wraps(func) # Para preservar nome da função, docstring, etc.
+    def wrapper(*args, **kwargs):
+      # Executar a função original
+      resultado = func(*args, **kwargs)
+
+      # Registrar o log pós a execução da transação
+      data_hora = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+      print(f"\n**** LOG DE TRANSAÇÃO ****")
+      print(f"Tipo de operacao: {tipo_transacao}")
+      mensagem = f"Realizada em: {data_hora}"
+      print(mensagem)
+      decorador = ''
+      for _ in mensagem:
+        decorador += '*'
+      print(f"{decorador}\n")
+      return resultado
+    return wrapper
+  return decorador_interna
 
 
 class Cliente():
@@ -152,7 +190,7 @@ class ContaCorrente(Conta):
 
   def sacar(self, valor):
     numero_saques = len(
-        [transacao for transacao in self.historico.transacoes['tipo'] == Saque.__name__]
+        [transacao for transacao in self.historico._transacoes if transacao['tipo'] == Saque.__name__]
       )
     
     excedeu_limite = valor > self._limite
@@ -179,15 +217,31 @@ class Historico():
   def __init__(self):
     self._transacoes = []
   
-  @property
-  def transacoes(self):
-    return self._transacoes
+  # @property
+  # def transacoes(self):
+  #   return self._transacoes
+
+  def gerar_relatorio_transacoes(self, tipo_filtro=None):
+    """
+    Gerador que itera sobre transações do histórico,
+    opcionalmente filtrando por tipo.
+    
+    Args:
+      tipo_filtro (str, opcional): O nome da classe da transação para filtrar
+                                    (ex. "Desposito", "Saque"). Se None retorna todas.
+    Yields:
+      dict: Um dicionario representando uma transação.                  
+    """
+    for transacao in self._transacoes:
+      if tipo_filtro is None or transacao["tipo"].lower() == tipo_filtro.lower():
+        yield transacao
+
   
   def adicionar_transacao(self, transacao):
     self._transacoes.append({
       "tipo":transacao.__class__.__name__,
       "valor":transacao.valor,
-      "data":datetime.now().strftime("%d-%m-%Y %h:%M:%Y")
+      "data":datetime.now().strftime("%d-%m-%Y %H:%M:%Y")
     })
 
 
@@ -232,6 +286,35 @@ class Saque(Transacao):
       conta.historico.adicionar_transacao(self)
 
 
+
+# ___ A CLASSE ITERADORA ContaIterador ---
+class ContaIterador:
+  def __init__(self, lista_contas):
+    self._lista_contas = lista_contas
+    self._index = 0 # índice para controlar a posição atual na iteração
+
+  def __iter__(self):
+    return self
+
+  def __next__(self):
+    if self._index < len(self._lista_contas):
+      conta_atual = self._lista_contas[self._index]
+      self._index += 1
+
+      # Retorno das informações básicas da conta
+      return {
+        "numero": conta_atual.numero,
+        "agencai": conta_atual.agencia,
+        "saldo": conta_atual.saldo,
+        "titular_nome":conta_atual.cliente.nome,
+        "titular_cpf": conta_atual.cliente.cpf
+      }
+    else:
+      # Não há mais contas, sinaliza o fim da iteração
+      raise StopIteration
+
+
+
 # Ações do usuário
 def filtrar_cliente(cpf, clientes):
   clientes_filtrados = [cliente for cliente in clientes if cliente.cpf == cpf]
@@ -241,10 +324,12 @@ def filtrar_cliente(cpf, clientes):
 def recuperar_conta_cliente(cliente):
   if not cliente.contas:
     print('\nCliente não possui conta!')
+    return
   
   return cliente.contas[0]
 
 
+@log_transacao('Despósito')
 def depositar(clientes):
   cpf = validacoes.receber_input_validado('CPF: ', 'CPF', validacoes.validar_cpf, 'CPF Inválido. Digite apenas os 11 números.')
   cliente = filtrar_cliente(cpf, clientes)
@@ -263,6 +348,7 @@ def depositar(clientes):
   cliente.realizar_transacao(conta, transacao)
 
 
+@log_transacao('Saque')
 def sacar(clientes):
   cpf = validacoes.receber_input_validado('CPF: ', 'CPF', validacoes.validar_cpf, 'CPF Inválido. Digite apenas os 11 números.')
   cliente = filtrar_cliente(cpf, clientes)
@@ -283,7 +369,13 @@ def sacar(clientes):
 
 def exibir_extrato(clientes):
   cpf = validacoes.receber_input_validado('CPF: ', 'CPF', validacoes.validar_cpf, 'CPF Inválido. Digite apenas os 11 números.')
-  cliente = filtrar_cliente(cpf, clientes)
+  # cpf = input("CPF: ").strip()
+  cpf_limpo = cpf.replace(".", "").replace("-", "")
+  if not cpf_limpo.isdigit() or len(cpf_limpo) != 11:
+    print('CPF inválido deve conter apenas digitos e 11 algarismos exatamente.')
+    return
+  
+  cliente = filtrar_cliente(cpf_limpo, clientes)
 
   if not cliente:
     print('\nCLiente não encontrado!')
@@ -294,20 +386,19 @@ def exibir_extrato(clientes):
     return
   
   print("\n================ EXTRATO ================")
-  transacoes = conta.historico.transacoes
 
-  extrato = ""
-  if not transacoes:
+  movimentacoes_encontradas = False
+  for transacao in conta.historico.gerar_relatorio_transacoes():
+    print(f"  Tipo: {transacao['tipo']}, Valor: R$ {transacao['valor']:.2f}, Data: {transacao['data']}")
+    movimentacoes_encontradas = True
+
+  if not movimentacoes_encontradas:
     print('Não foram realizadas movimentações.')
-  else:
-    for transacao in transacoes:
-      extrato += f"\n{transacao['tipo']}:\n\tR$ {transacao['valor']:,.2f}"
-  
-  print(extrato)
-  print(f"\nSaldo: \n\tR$ {conta.saldo:,.2f}")
+
+  print(f"\nSaldo: \t\t\tR$ {conta.saldo:,.2f}")
   print("==========================================")
 
-
+@log_transacao("Criação de Cliente")
 def criar_cliente():
     usuario = {}
     print("\n=============== Cadastro de Novo Cliente ===============")
@@ -317,9 +408,11 @@ def criar_cliente():
 
     cpf = validacoes.receber_input_validado('CPF (apenas dígitos): ', 'CPF', validacoes.validar_cpf, 'CPF Inválido. Digite apenas os 11 números.')
     usuario['cpf'] = cpf
+    
 
     dt_nascimento = validacoes.receber_input_validado('Data de nascimento (formato: dd/mm/aaaa): ', 'Data de Nascimento', validacoes.validar_dt_nascimento, "Formato de data inválido (dd/mm/aaaa).", validacoes.converter_dt_nascimento)
     usuario['data_nascimento'] = dt_nascimento
+    
 
     usuario['endereco'] = ''
 
@@ -328,25 +421,29 @@ def criar_cliente():
     
     nro = validacoes.receber_input_validado('Nº: ', 'número', validacoes.validar_numero_endereco,  "O nº do endereço deve ser um dígito, ou 0 se não houver.", validacoes.converter_numero_endereco)
     usuario['endereco'] += f', {nro}'
+    
 
     bairro = validacoes.receber_input_validado('Bairro: ', 'bairro', validacoes.validar_text_obrigatorio, "Bairro inválido")
     usuario['endereco'] += f', {bairro}'
+    
 
     cidade = validacoes.receber_input_validado('Cidade: ', 'cidade', validacoes.validar_text_obrigatorio, 'Valor inválido para cidade.')
     usuario['endereco'] += f' - {cidade}'
+    
 
     uf = validacoes.receber_input_validado('UF: ', 'uf', validacoes.validar_uf, 'UF inválida (exemplo: SP).')
     usuario['endereco'] += f'/{uf}'
+    
     
     cliente = PessoaFisica(usuario.get('cpf'), usuario.get('nome'), usuario.get('data_nascimento'), usuario.get('endereco'))
     validacoes.clientes.append(cliente)
     print("\n=== Finalização de Cadastro de Cliente ===============")
     print("\n=============== Cliente Cadastrado Com Sucesso !===============")
     
-
+@log_transacao("Criação de Conta")
 def criar_conta(numero_conta, clientes, contas):      
   while True:
-    cpf = input('CPF do cliente (digite "q" para voltar ao menu anterior): ')
+    cpf = validacoes.receber_input_validado('CPF: ', 'CPF', validacoes.validar_cpf, 'CPF Inválido. Digite apenas os 11 números.')
     if cpf == 'q':
       break
     else: 
@@ -360,17 +457,24 @@ def criar_conta(numero_conta, clientes, contas):
           conta = ContaCorrente.nova_conta(cliente=cliente, numero=numero_conta)
           contas.append(conta)
           cliente.contas.append(conta)
-          print("\n=== Conta criada com sucess! ===")
+          print("\n=== Conta criada com sucess! ===\n")
           break
         else:
-          print('Cliente não localizado. Verifique o CPF digitado.')
+          print('Cliente não localizado. Deseja cadastrar novo cliente?')
+          resposta = input(f"[S]im / [N]ão").strip()
+          if resposta.lower() == 's':
+            print(f"Cadastrando novo cliente")
+          elif resposta.lower() == 'n':
+            print(f"Voltando ao menu inicial...")
+            break
 
-
+@log_transacao('Listar Contas')
 def listar_contas(contas):
-  for conta in contas:
-    print('=' * 100)
-    print(textwrap.dedent(str(conta)))
-  
+  # for conta in contas:
+  #   print('=' * 100)
+  #   print(textwrap.dedent(str(conta)))
+  contas_listadas = ContaIterador(contas)
+  print(contas_listadas)
 
 def localizar_cli(cpf, clientes):
     for cliente in clientes:
